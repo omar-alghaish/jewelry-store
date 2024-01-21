@@ -1,0 +1,7 @@
+.header2{
+    display: flex;
+    justify-content: space-between;
+}
+.input-container{
+    width: 300px;
+}

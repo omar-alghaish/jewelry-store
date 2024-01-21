@@ -1,0 +1,17 @@
+.app>* {
+  direction: rtl !important;
+}
+
+
+.formGroupsو .formGroups .col-lg-3 {
+  display: flex;
+  justify-content: space-between;
+  width: 100% !important;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+a p{
+  font-size: 13px;
+  
+}
