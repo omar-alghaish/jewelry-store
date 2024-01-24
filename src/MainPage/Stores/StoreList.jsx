@@ -35,6 +35,7 @@ import { Loader } from "react-feather";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import leveljs from "level-js";
 import { addItem } from "../../stroe/reducers/editItemReducer";
+import { search } from "../../functions/uniqeId";
 const levelup = require("levelup");
 // import { Calibers } from "../../assets/data/Calibers";
 const db = levelup(leveljs("./db"));
@@ -52,12 +53,13 @@ const options2 = [
   { id: 2, text: "ماركة", text: "ماركة" },
 ];
 
-
 const Moves7 = () => {
   const [inputfilter, setInputfilter] = useState(false);
   const [store, setstore] = useState([]);
   const [openPay, setOpenPay] = useState(false);
   const [currentRecord, setCurrendRecord] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setfiteredData] = useState(store);
 
   const dispatch = useDispatch();
   const handleGetAll = () => {
@@ -66,7 +68,7 @@ const Moves7 = () => {
     });
   };
 
-  console.log(store)
+  console.log(store);
   const handleShow = (record) => {
     let allstore = [...store];
     const hidden = record.hidden ? 0 : 1;
@@ -80,11 +82,18 @@ const Moves7 = () => {
     db.get("stores", function (err, value) {
       setstore(value ? JSON.parse(value) : []);
     });
+    db.get("stores", function (err, value) {
+      setfiteredData(value ? JSON.parse(value) : []);
+    });
   }, []);
-console.log(store)
+  console.log(store);
   const togglefilter = (value) => {
     setInputfilter(value);
   };
+
+  //  useEffect(() => {
+
+  //  }, [searchQuery])
 
   const history = useHistory();
 
@@ -93,6 +102,21 @@ console.log(store)
       title: "رقم",
       dataIndex: "id",
       sorter: (a, b) => a.description.length - b.description.length,
+    },
+    {
+      title: "إسم المنتج",
+      dataIndex: "productName",
+      render: (text, record) => (
+        <div className="productimgname">
+          <Link to="#" className="product-img">
+            <img alt="" src={record?.image} />
+          </Link>
+          <Link to="#" style={{ fontSize: "15px", marginLeft: "10px" }}>
+            {record?.productName}
+          </Link>
+        </div>
+      ),
+      sorter: (a, b) => a.product_name.length - b.product_name.length,
     },
     {
       title: "الفئه",
@@ -125,19 +149,14 @@ console.log(store)
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
-        title: "الوزن",
-        dataIndex: "weight",
-        sorter: (a, b) => a.createdBy.length - b.createdBy.length,
-      },
-  
+      title: "الوزن",
+      dataIndex: "weight",
+      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
+    },
+
     {
       title: "نوع العنصر",
       dataIndex: "itemType",
-      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
-    },
-    {
-      title: "اسم المنتج",
-      dataIndex: "productName",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
@@ -146,21 +165,21 @@ console.log(store)
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
-        title: "الدفعه المبدأيه",
-        dataIndex: "initialPayment",
-        sorter: (a, b) => a.description.length - b.description.length,
-      },
+      title: "الدفعه المبدأيه",
+      dataIndex: "initialPayment",
+      sorter: (a, b) => a.description.length - b.description.length,
+    },
     {
       title: "الاجمالي",
       dataIndex: "total",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
-   
+
     {
       title: "أوامر",
       render: (_, record) => (
         <>
-          <div style={{ display: "flex", gap: "20px",width:"max-content" }}>
+          <div style={{ display: "flex", gap: "20px", width: "max-content" }}>
             <span
               style={{ cursor: "pointer" }}
               onClick={() => {
@@ -209,7 +228,10 @@ console.log(store)
               <h6>عرض وبحث فى القائمة</h6>
             </div>
             <div className="page-btn">
-              <Link to="/dream-pos/store/add-to-store" className="btn btn-added">
+              <Link
+                to="/dream-pos/store/add-to-store"
+                className="btn btn-added"
+              >
                 <img src={PlusIcon} alt="img" className="me-1" />
                 إضافه الي المخزن
               </Link>
@@ -218,8 +240,46 @@ console.log(store)
           {/* /product list */}
           <div className="card">
             <div className="card-body">
-              <Tabletop inputfilter={inputfilter} togglefilter={togglefilter} data={store}/>
-              {/* /Filter */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  // background:"red"
+                }}
+              >
+                <div
+                  className="search-input"
+                  style={{
+                    width: "300px",
+                    padding: "10px",
+                    height: "max-content",
+                  }}
+                >
+                  <input
+                    className="form-control form-control-sm search-icon"
+                    type="search"
+                    style={{ height: "40px" }}
+                    placeholder="Search..."
+                    // value={}
+                    onChange={(e) => {
+                      e.target.value === ""
+                        ? setfiteredData(store)
+                        : setfiteredData(search(store, e.target.value));
+                    }}
+                  />
+                  {/* <Link to="#" className="btn btn-searchset" style={{position:"absolute"}}>
+                  <img src={Search} alt="img" />
+                </Link> */}
+                </div>
+                <Tabletop
+                  inputfilter={inputfilter}
+                  togglefilter={togglefilter}
+                  data={store}
+                  columns={columns}
+                />
+              </div>
+
               <div
                 className={`card mb-0 ${inputfilter ? "toggleCls" : ""}`}
                 id="filter_inputs"
@@ -274,8 +334,11 @@ console.log(store)
               <div className="table-responsive">
                 {store && store?.length ? (
                   <>
-                    <Table columns={columns} dataSource={store} />
-                 
+                    <Table
+                      columns={columns}
+                      dataSource={filteredData || store}
+                      isPaginatoin={true}
+                    />
                   </>
                 ) : (
                   "لا يوجد بيانات"

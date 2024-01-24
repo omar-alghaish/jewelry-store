@@ -107,7 +107,11 @@ const Posleft = ({
                     }}
                     key={index}
                     id={item.cat}
-                    className={"item"}
+                    // className={"item"}
+                    className={selectedcate === item?.category_name
+                      ? "col-lg-2 col-sm-3 d-flex active"
+                      : "col-lg-2 col-sm-3 d-flex"}
+                    style={{}}
                   >
                     <div className="product-details">
                       <img

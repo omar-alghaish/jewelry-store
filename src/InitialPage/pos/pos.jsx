@@ -42,6 +42,7 @@ import { toast } from "react-toastify";
 import leveljs from "level-js";
 const levelup = require("levelup");
 import * as userData from "../App";
+import { getCurrentDate } from "../../functions/uniqeId";
 const Pos = () => {
   // const ProductsData = localStorage.getItem("products")
   // ? JSON.parse(localStorage.getItem("products"))
@@ -372,7 +373,7 @@ const Pos = () => {
                                           />
                                           <input
                                             onClick={() => {
-                                              console.log(item?.originQuantity);
+                                              console.log(item);
                                               dispatch(
                                                 updateCart({
                                                   client_id,
@@ -673,20 +674,26 @@ const Pos = () => {
                                 height: "100%",
                                 border: "none",
                               }}
+                              max={(filteredCart?.cart_total_price -
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(discount) / 100) +
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(dam) / 100) +
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(tax) / 100))}
                               type="text"
                               value={val}
                               onChange={(e) => {
                                 const enteredValue = e.target.value;
-                                
                                 if (
                                   !isNaN(enteredValue) &&
-                                  parseFloat(enteredValue) <=
-                                    parseFloat(filteredCart?.cart_total_price)
+                                  +enteredValue <=
+                                    +filteredCart?.cart_total_price
                                 ) {
                                   setVal(enteredValue);
                                 }
                               }}
-                              max={filteredCart?.cart_total_price}
+                              // max={filteredCart?.cart_total_price}
                               placeholder="0.00"
                             />
 
@@ -700,7 +707,13 @@ const Pos = () => {
                                     // if()
                                     if (val == 0) {
                                       setVal(item);
-                                    } else {
+                                    }  else if (+val.toString().concat(item) <= (filteredCart?.cart_total_price -
+                                      parseFloat(filteredCart?.cart_total_price) *
+                                        (parseInt(discount) / 100) +
+                                      parseFloat(filteredCart?.cart_total_price) *
+                                        (parseInt(dam) / 100) +
+                                      parseFloat(filteredCart?.cart_total_price) *
+                                        (parseInt(tax) / 100))) { 
                                       setVal(val.toString().concat(item));
                                     }
                                   }}
@@ -742,21 +755,39 @@ const Pos = () => {
                           <div className="bignumbers">
                             <p
                               onClick={() => {
-                                setVal("100");
+                                if( (filteredCart?.cart_total_price -
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(discount) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(dam) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(tax) / 100)) >= 100 )  setVal("100");
                               }}
                             >
                               100
                             </p>
                             <p
                               onClick={() => {
-                                setVal("50");
+                                if( (filteredCart?.cart_total_price -
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(discount) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(dam) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(tax) / 100)) >= 50 )  setVal("50");
                               }}
                             >
                               50
                             </p>
                             <p
                               onClick={() => {
-                                setVal("20");
+                                if( (filteredCart?.cart_total_price -
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(discount) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(dam) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(tax) / 100)) >= 20 )  setVal("20");
                               }}
                             >
                               20
@@ -770,28 +801,65 @@ const Pos = () => {
                             </p>
                             <p
                               onClick={() => {
-                                setVal("1000");
+                                if( (filteredCart?.cart_total_price -
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(discount) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(dam) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(tax) / 100)) >= 2000 )  setVal("2000");
+                              }}
+                            >
+                              2000
+                            </p>
+                            <p
+                              onClick={() => {
+                                if( (filteredCart?.cart_total_price -
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(discount) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(dam) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(tax) / 100)) >= 1000 )  setVal("1000");
                               }}
                             >
                               1000
                             </p>
-                            <p
+                            {/* <p
                               onClick={() => {
-                                setVal("1000");
+                               if( (filteredCart?.cart_total_price -
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(discount) / 100) +
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(dam) / 100) +
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(tax) / 100)) >= 100 ) setVal("100");
                               }}
                             >
                               100
-                            </p>
+                            </p> */}
                             <p
                               onClick={() => {
-                                setVal("500");
+                                if( (filteredCart?.cart_total_price -
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(discount) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(dam) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(tax) / 100)) >= 500 ) setVal("500");
                               }}
                             >
                               500
                             </p>
                             <p
                               onClick={() => {
-                                setVal("200");
+                                if( (filteredCart?.cart_total_price -
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(discount) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(dam) / 100) +
+                                  parseFloat(filteredCart?.cart_total_price) *
+                                    (parseInt(tax) / 100)) >= 200 )  setVal("200");
                               }}
                             >
                               200
@@ -801,14 +869,14 @@ const Pos = () => {
                             <h4 className="">الباقى</h4>
                             <p className="reset">
                               <span>
-                                {val -
+                                {Math.abs(val -
                                   (filteredCart?.cart_total_price -
                                     parseFloat(filteredCart?.cart_total_price) *
                                       (parseInt(discount) / 100) +
                                     parseFloat(filteredCart?.cart_total_price) *
                                       (parseInt(dam) / 100) +
                                     parseFloat(filteredCart?.cart_total_price) *
-                                      (parseInt(tax) / 100))}
+                                      (parseInt(tax) / 100)))  || 0.00}
                               </span>
                               <span>ر.س</span>
                             </p>
@@ -817,11 +885,24 @@ const Pos = () => {
                         <li
                           onClick={() => {
                             const order = {
-                              totalPrice: filteredCart?.cart_total_price,
+                              totalPrice:
+                                filteredCart?.cart_total_price -
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(discount) / 100) +
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(dam) / 100) +
+                                parseFloat(filteredCart?.cart_total_price) *
+                                  (parseInt(tax) / 100),
                               initialPrice: val,
-                              remain: filteredCart.cart_total_price - val,
+                              remain: filteredCart?.cart_total_price -
+                              parseFloat(filteredCart?.cart_total_price) *
+                                (parseInt(discount) / 100) +
+                              parseFloat(filteredCart?.cart_total_price) *
+                                (parseInt(dam) / 100) +
+                              parseFloat(filteredCart?.cart_total_price) *
+                                (parseInt(tax) / 100) - val,
                               PayDetails: [
-                                { date: new Date(), id: 1, total: val },
+                                { date: getCurrentDate(), id: 1, total: val },
                               ],
                               totalPayments: val,
                               discount:

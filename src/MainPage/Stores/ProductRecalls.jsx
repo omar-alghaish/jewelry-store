@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import "./style/main.css";
 import levelup from "levelup";
 import leveljs from "level-js";
+import { getCurrentDate } from "../../functions/uniqeId";
 
 const { Option } = Select;
 
@@ -16,6 +17,7 @@ const ProductRecalls = () => {
   const [quantity, setQuantity] = useState(0);
   const [product, setProduct] = useState({});
   const [products, setProducts] = useState([]);
+  const [image, setImage] = useState();
   const [productRecallsBills, setProductRecallsBills] = useState([]);
 
   const handleGetAllStores = () => {
@@ -40,7 +42,7 @@ const ProductRecalls = () => {
     setSelectedStore(value);
     const theProduct = stores.filter((item) => item.id === +value);
     setProduct(theProduct[0]);
-
+    setImage(theProduct[0].image);
     message.info(`Selected Store: ${value}`);
   };
 
@@ -56,7 +58,7 @@ const ProductRecalls = () => {
           handleGetAllStores();
 
           setProduct((prev) => ({ ...prev, quantity: updatedQuantity }));
-          return { ...store, quantity: updatedQuantity };
+          return { ...store, quantity: updatedQuantity, image };
         }
         return store;
       });
@@ -71,24 +73,26 @@ const ProductRecalls = () => {
         }
       });
 
-
       const updatedProducts = products.map((item) => {
-        console.log(item.product_name === product.productName)
-        console.log( product)
+        console.log(item.product_name === product.productName);
+        console.log(product);
         if (item.product_name === product.productName) {
           return {
             ...item,
             quantity: +item.quantity + +quantity,
-            stock: +product.quantity, 
+            stock: +product.quantity,
+            image,
           };
         }
-        return item; 
+        return item;
       });
-      
-      const productExists = products.some((item) => item.product_name === product.productName);
+
+      const productExists = products.some(
+        (item) => item.product_name === product.productName
+      );
 
       // console.log(productExists)
-      
+
       if (!productExists) {
         const newProduct = {
           caliber_name: product.caliber,
@@ -100,12 +104,12 @@ const ProductRecalls = () => {
           quantity: +quantity,
           stock: +product.quantity,
           id: products.length + 1,
+          image,
         };
-      
+
         updatedProducts.push(newProduct);
       }
-      
-      
+
       db.put("products", JSON.stringify(updatedProducts), function (err) {
         if (err) {
           toast.error("حدث خطأ");
@@ -120,9 +124,10 @@ const ProductRecalls = () => {
         {
           ...product,
           quantity,
-          documentDate: new Date(),
+          documentDate: getCurrentDate(),
           total: quantity * product.itemPrice,
           id: productRecallsBills.length + 1,
+          image,
         },
       ];
       db.put(

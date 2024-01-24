@@ -134,10 +134,10 @@ const Sidebar = (props) => {
                     </li>
                   </ul>
                 </li>
-                <li className="submenu-open">
+                {/* <li className="submenu-open">
                   <h6 className="submenu-hdr">الحركات</h6>
                   <ul></ul>
-                </li>
+                </li> */}
 
                 <li className="submenu-open">
                   <h6 className="submenu-hdr">حسابات</h6>
@@ -433,22 +433,20 @@ const Sidebar = (props) => {
                           </li>
                           <li
                             className={
-                              pathname.includes("/dream-pos/moves/move10")
+                              pathname.includes("/dream-pos/moves/movesList")
                                 ? "active"
                                 : ""
                             }
                           >
                             <Link
                               className={
-                                pathname.includes("/dream-pos/moves/move10")
+                                pathname.includes("/dream-pos/moves/movesList")
                                   ? "active"
                                   : ""
                               }
-                              to="/dream-pos/moves/move10"
+                              to="/dream-pos/moves/movesList"
                             >
-                              <p style={{ fontSize: "13px" }}>
-                                تجهيز و ترحيل حركات الذهب
-                              </p>
+                              <p style={{ fontSize: "13px" }}>قائمة الحركات</p>
                             </Link>
                           </li>
                         </ul>
@@ -1285,6 +1283,22 @@ const Sidebar = (props) => {
                         {/* <i data-feather="bar-chart-2" /> */}
                         <FeatherIcon icon="bar-chart-2" />
                         <span>تقرير فواتير البيع</span>
+                      </Link>
+                    </li>
+                    <li
+                      className={
+                        pathname.includes("retrivesreport") ? "active" : ""
+                      }
+                    >
+                      <Link
+                        to="/dream-pos/report/retrivesreport"
+                        className={
+                          pathname.includes("retrivesreport") ? "active" : ""
+                        }
+                      >
+                        {/* <i data-feather="bar-chart-2" /> */}
+                        <FeatherIcon icon="bar-chart-2" />
+                        <span>تقرير المرتجعات</span>
                       </Link>
                     </li>
                     <li

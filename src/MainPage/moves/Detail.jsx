@@ -27,7 +27,7 @@ const Details = ({ data }) => {
           <strong>الرقم: </strong> {data.number}
         </p>
           <p>
-            <strong>شيك: </strong> {data.check}
+            <strong>شيك: </strong> {data.check ? "نعم" : "لا"}
           </p>
         </div>
 
@@ -53,7 +53,7 @@ const Details = ({ data }) => {
             <strong>الفرق: </strong> {data.difference}
           </p>
           <p>
-            <strong>مبلغ الخصم: </strong> {data.discountAmount}
+            <strong>نسبة الخصم: </strong> {data.discountAmount}
           </p>
           <p>
             <strong>مبلغ فارق العيار: </strong> {data.caliberDifferenceAmount}
@@ -74,46 +74,22 @@ const Details = ({ data }) => {
         </div>
 
         <div style={{ padding: "50px 0", borderBottom: "1px solid black" }}>
-          <p>
+        <p>
             <strong>طريقة الدفع:</strong> {data.row3_paymentMethod}
           </p>
-          <p>
-            <strong>الوز ذهب كسر عيار18:</strong> {data.row3_goldWeight18}
-          </p>
-          <p>
-            <strong>الوزن ذهب كسر عيار21:</strong> {data.row3_goldWeight21}
-          </p>
-          <p>
-            <strong>الوزن ذهب كسر عيار22:</strong> {data.row3_goldWeight22}
-          </p>
-          <p>
-            <strong>الوزن ذهب كسر عيار24:</strong> {data.row3_goldWeight24}
-          </p>
+          <p><strong>المبلغ:</strong>{data.row3_moneyAmount}</p>
+          {
+            data?.goldItems?.map((item)=>(
+              <>
+                <p>
+              <strong>الوزن ذهب كسر عيار{item?.carat}: {item?.weight}</strong> 
+            </p>
+              </>
+            
+            ))
+          }
+          
         </div>
-
-      
-        <div style={{ padding: "50px 0", borderBottom: "1px solid black" }}>
-          <p>
-            <strong>طريقة السداد:</strong> {data.row7_wayToPay}
-          </p>
-          <p>
-            <strong>الوزن ذهب كسر عيار18:</strong> {data.row7_goldWeight18}
-          </p>
-          <p>
-            <strong>الوزن ذهب كسر عيار21:</strong> {data.row7_goldWeight21}
-          </p>
-          <p>
-            <strong>الوزن ذهب كسر عيار22:</strong> {data.row7_goldWeight22}
-          </p>
-          <p>
-            <strong>الوزن ذهب كسر عيار24:</strong> {data.row7_goldWeight24}
-          </p>
-          <p>
-          <strong>المبلغ المطلوب سداده نقدا:</strong>
-          {data.row7_cashPaymentAmount}
-        </p>
-        </div>
-
         <div style={{ padding: "50px 0", borderBottom: "1px solid black" }}>
           <p>
             <strong>النوع:</strong> {data.selectedType}

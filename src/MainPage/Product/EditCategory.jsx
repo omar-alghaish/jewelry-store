@@ -148,7 +148,7 @@ const EditProduct = () => {
                         setproduct({ ...product, weight: e.target.value });
                         // handleChangeValues('weight',e.target.value);
                       }}
-                      value={product.weight}
+                      value={product?.weight}
                       type="text"
                     />
                   </div>
@@ -185,7 +185,7 @@ const EditProduct = () => {
                         // handleChangeValues('category',e.target.value);
                         setproduct({ ...product, category: e.target.value });
                       }}
-                      value={product.category}
+                      value={product?.category}
                       style={{
                         width: "100%",
                         padding: "10px",
@@ -202,7 +202,7 @@ const EditProduct = () => {
                       {Categories?.map((item, index) => {
                         return (
                           <option key={index} value={item.category_name}>
-                            {item.category_name}
+                            {item?.category_name}
                           </option>
                         );
                       })}

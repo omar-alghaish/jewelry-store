@@ -36,7 +36,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import ModalContent from "../sales/Modal";
 const levelup = require("levelup");
 
-const SalesReturnList = () => {
+const Retrives = () => {
   const db = levelup(leveljs("./db"));
 
   const [inputfilter, setInputfilter] = useState(false);
@@ -169,16 +169,6 @@ const SalesReturnList = () => {
       sorter: (a, b) => a.due.length - b.due.length,
     },
     {
-      title: " تاريخ الدفع للعميل",
-      dataIndex: "installmentDateCustomer",
-      sorter: (a, b) => a.due.length - b.due.length,
-    },
-    {
-      title: "تاريخ الدفع لنا",
-      dataIndex: "installmentDateOwner",
-      sorter: (a, b) => a.due.length - b.due.length,
-    },
-    {
       title: "المدفوع المبلغ",
       dataIndex: "moneyAmount",
       sorter: (a, b) => a.due.length - b.due.length,
@@ -208,7 +198,7 @@ const SalesReturnList = () => {
     },
     {
       title: "اجمالي المبلغ المسترجع",
-      dataIndex: "totalPrice",
+      dataIndex: "totalLocalCurrency",
       sorter: (a, b) => a.paymentStatus.length - b.paymentStatus.length,
     },
     {
@@ -350,6 +340,7 @@ const handleGetAll = ()=>{
                   </div>
                 </div>
               </div>
+              {/* /Filter */}
               <ModalContent
                 isOpen={modalOpen}
                 setOpen={setModalOpen}
@@ -373,9 +364,10 @@ const handleGetAll = ()=>{
               </div>
             </div>
           </div>
+          {/* /product list */}
         </div>
       </div>
     </>
   );
 };
-export default SalesReturnList;
+export default Retrives;

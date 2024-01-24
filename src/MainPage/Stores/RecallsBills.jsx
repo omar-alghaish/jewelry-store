@@ -95,6 +95,21 @@ console.log(store)
       sorter: (a, b) => a.description.length - b.description.length,
     },
     {
+      title: "إسم المنتج",
+      dataIndex: "productName",
+      render: (text, record) => (
+        <div className="productimgname">
+          <Link to="#" className="product-img">
+            <img alt="" src={record?.image} />
+          </Link>
+          <Link to="#" style={{ fontSize: "15px", marginLeft: "10px" }}>
+            {record?.productName}
+          </Link>
+        </div>
+      ),
+      sorter: (a, b) => a.product_name.length - b.product_name.length,
+    },
+    {
       title: "الفئه",
       dataIndex: "category",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
@@ -124,11 +139,6 @@ console.log(store)
     {
       title: "نوع العنصر",
       dataIndex: "itemType",
-      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
-    },
-    {
-      title: "اسم المنتج",
-      dataIndex: "productName",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
@@ -260,7 +270,7 @@ console.log(store)
               <div className="table-responsive">
                 {store && store?.length ? (
                   <>
-                    <Table columns={columns} dataSource={store} />
+                    <Table columns={columns} dataSource={store} isPaginatoin={true} />
                  
                   </>
                 ) : (

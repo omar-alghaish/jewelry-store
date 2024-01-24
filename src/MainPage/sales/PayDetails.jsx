@@ -5,6 +5,7 @@ import Table from "../../EntryFile/datatable";
 import leveljs from "level-js";
 import { toast } from "react-toastify";
 import ModalContent from "./Modal";
+import { getCurrentDate } from "../../functions/uniqeId";
 const levelup = require("levelup");
 const db = levelup(leveljs("./db"));
 
@@ -36,12 +37,11 @@ const PayDetails = ({ data }) => {
 
     const remain = parseFloat(product?.remain) - parsedAmount;
 
-    // Check if remaining amount is greater than 0
     if (remain >= 0) {
       const updatedStore = store.map((item) => {
         if (+item.id === +data.id) {
           const newPayment = {
-            date: new Date(),
+            date: getCurrentDate(),
             id: item?.PayDetails.length + 1,
             total: parsedAmount.toFixed(2),
           };
@@ -99,7 +99,7 @@ const PayDetails = ({ data }) => {
   ];
 
   return (
-    <div>
+    <div style={{marginTop:"50px",display:"flex", flexDirection:"column", gap:"50px"}}>
       <div
         className="top"
         style={{ display: "flex", alignItems: "center", gap: "50px" }}
@@ -118,7 +118,7 @@ const PayDetails = ({ data }) => {
           <button
             className="btn btn-submit me-2"
             style={{ margin: "50px" }}
-            onClick={()=> setOpenPayModal(true)}
+            onClick={() => setOpenPayModal(true)}
           >
             دفع
           </button>
@@ -134,19 +134,35 @@ const PayDetails = ({ data }) => {
         setOpen={setOpenPayModal}
         header="تاكيد عملية الدفع"
       >
-        <div>
-          <div className="form-group equal-width">
+        <div
+          style={{
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "20px",
+          }}
+        >
+          <div
+            className="form-group"
+            style={{ width: "300px", height: "200px !important", margin: "0" }}
+          >
             <label>المبلغ المدفوع</label>
             <input
-              type="number"
+              type="text"
               value={paymentAmount}
               onChange={(e) => setPaymentAmount(e.target.value)}
             />
           </div>
           <button
             className="btn btn-submit me-2"
-            style={{ margin: "50px" }}
-            onClick={handlePay}
+            style={{ margin: "0px", width: "300px" }}
+            onClick={() => {
+              handlePay();
+              setOpenPayModal(false);
+              setPaymentAmount("");
+            }}
           >
             تاكيد
           </button>

@@ -12,30 +12,22 @@ const ModalContent = ({ isOpen, setOpen, children, header }) => {
         backgroundColor: "#fff",
         padding: "20px",
         border: "1px solid #ccc",
-        position: "fixed",
-        top: "0",
-        left: isOpen ? "0" : "100%",
-        zIndex: "1111111",
-        width: "100vw",
-        height: "100vh",
-        overflow: "scroll",
-        transition: ".3s",
+        position:"fixed",
+        top:"0",
+        left:isOpen ?"0" : "100%",
+        zIndex:"1111111",
+        width:"100vw",
+        height:  "100vh" ,
+        overflow:"scroll",
+        transition:".3s"
+        
       }}
     >
-      <div
-        style={{
-          justifyContent: "flex-end",
-          position: "fixed",
-          top: "50px",
-          left: "50px",
-          display: isOpen ? "flex" : "none",
-        }}
-      >
+      <div style={{  justifyContent: "flex-end", position:'fixed', top:"50px", left:"50px", display: isOpen ? "flex" : "none" }}>
         <CloseIcon onClick={closeModal} style={{ cursor: "pointer" }} />
       </div>
-      <div>
-        {" "}
-        {header && <h2>{header}</h2>}
+      <div> {header &&   <h2>{header}</h2>}
+      
         {children}
       </div>
     </div>

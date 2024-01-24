@@ -85,7 +85,6 @@ const SignInPage = (props) => {
 
 
 
-
   const logIn = (e) => {
     const data = {
       email: e.target.email.value,
@@ -249,3 +248,6 @@ const SignInPage = (props) => {
 };
 
 export default SignInPage;
+
+// "shiftone@esnad.com"
+// 1231

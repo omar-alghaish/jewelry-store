@@ -6,7 +6,7 @@ import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import { toast } from "react-toastify";
 import axios from "axios";
-import "./addKart.css"
+import "./addKart.css";
 import { Loader } from "feather-icons-react/build/IconComponents";
 // import { Categories } from '../../assets/data/Categories';
 import leveljs from "level-js";
@@ -45,7 +45,23 @@ const AddProduct = () => {
     status: "",
     product_image: "",
   });
+  console.log(img);
+  
+  const handleImgUpload = (e) => {
+    var reader = new FileReader();
+    reader.onloadend = function () {
+      if (reader.readyState === FileReader.DONE) {
+        const base64Image = reader.result;
+        setimg(base64Image);
 
+        setproddata({ ...proddata, image: base64Image });
+      }
+    };
+    reader.onerror = function (error) {
+      console.log("Error reading file:", error);
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  };
   useEffect(() => {
     db.get("products", function (err, value) {
       setProducts(value ? JSON.parse(value) : []);
@@ -305,24 +321,7 @@ const AddProduct = () => {
                   <div className="form-group">
                     <label> صورةالمنتج</label>
                     <div className="image-upload">
-                      <input
-                        onChange={(e) => {
-                          var reader = new FileReader();
-                          reader.onloadend = function () {
-                            if (reader.readyState === FileReader.DONE) {
-                              const base64Image = reader.result;
-                              setimg(base64Image);
-
-                              setproddata({ ...proddata, image: base64Image });
-                            }
-                          };
-                          reader.onerror = function (error) {
-                            console.log('Error reading file:', error);
-                          };
-                          reader.readAsDataURL(e.target.files[0]);
-                        }}
-                        type="file"
-                      />
+                      <input onChange={(e) => handleImgUpload(e)} type="file" />
                       <div className="image-uploads">
                         <img src={Upload} alt="img" />
                         <h4>قم بسحب وإسقاط الملف للتحميل</h4>
@@ -370,16 +369,16 @@ const AddProduct = () => {
                         setimg(false);
                       }}
                       style={{
-                        cursor: imgloading ? 'no-drop' : 'pointer',
-                        width: '200px',
-                        padding: '10px',
-                        borderRadius: '10px',
-                        border: 'none',
-                        backgroundColor: '#ffc107',
-                        color: 'white',
+                        cursor: imgloading ? "no-drop" : "pointer",
+                        width: "200px",
+                        padding: "10px",
+                        borderRadius: "10px",
+                        border: "none",
+                        backgroundColor: "#ffc107",
+                        color: "white",
                       }}
                     >
-                      {imgloading ? <Loader /> : 'حذف الصوره'}
+                      {imgloading ? <Loader /> : "حذف الصوره"}
                     </button>
                   </div>
                 ) : null}

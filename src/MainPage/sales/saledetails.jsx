@@ -67,7 +67,7 @@ console.log(sale)
                   </span>
                 </li>
                 <li>
-                  <span>
+                  <span onClick={()=> window.print()}>
                     <img src={Printer} alt="img" />
                   </span>
                 </li>
@@ -550,7 +550,7 @@ console.log(sale)
                   </div>
                 </div>
               </div>
-              <div className="col-lg-12">
+              <div className="col-lg-12" style={{margin:"50px 0"}}>
                 <span  className="btn btn-submit me-2" onClick={()=>{setModalOpen(true)}}>
                   تحديث
                 </span>

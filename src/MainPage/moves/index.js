@@ -7,6 +7,7 @@ import Moves8 from "./Moves8";
 import Moves7 from "./Moves7";
 import EditMove from "./EditMove"
 import Deportation from "./Deportation";
+import MovesList from "./MovesList";
 
 const MovesIndex = ({ match }) => (
   <Switch>
@@ -16,6 +17,8 @@ const MovesIndex = ({ match }) => (
     <Route path={`${match.url}/move7`} component={Moves7} />
     <Route path={`${match.url}/edit-move`} component={EditMove} />
     <Route path={`${match.url}/deportation`} component={Deportation} />
+    <Route path={`${match.url}/movesList`} component={MovesList} />
+
   </Switch>
 );
 

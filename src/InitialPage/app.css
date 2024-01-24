@@ -15,3 +15,14 @@ a p{
   font-size: 13px;
   
 }
+
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .table {
+    visibility: visible;
+  }
+}

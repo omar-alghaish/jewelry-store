@@ -22,6 +22,7 @@ import HomeThree from '../MainPage/Home/home3';
 import { ToastContainer } from 'react-toastify';
 const levelup = require('levelup');
 import leveljs from 'level-js';
+import Print from '../EntryFile/print';
 
 
 export const data = localStorage.getItem("useLoggIn")
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="/error-500" component={Error500} />
         <Route path="/pos" component={Pos} />
         <Route path="/index-three" component={HomeThree} />
+        <Route path="/print" component={Print} />
         <ToastContainer />
       </Switch>
     </div>

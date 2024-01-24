@@ -211,12 +211,12 @@ console.log(store)
               <h4>قائمه المخزن </h4>
               <h6>عرض وبحث فى القائمة</h6>
             </div>
-            <div className="page-btn">
+            {/* <div className="page-btn">
               <Link to="/dream-pos/store/add-to-store" className="btn btn-added">
                 <img src={PlusIcon} alt="img" className="me-1" />
                 إضافه الي المخزن
               </Link>
-            </div>
+            </div> */}
           </div>
           {/* /product list */}
           <div className="card">

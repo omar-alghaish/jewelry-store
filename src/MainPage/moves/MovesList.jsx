@@ -36,7 +36,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import leveljs from "level-js";
 import { addItem } from "../../stroe/reducers/editItemReducer";
 import ModalContent from "./Modal";
-import PayDetails from "./PayDetails";
+import Details from "./Detail";
 const levelup = require("levelup");
 // import { Calibers } from "../../assets/data/Calibers";
 const db = levelup(leveljs("./db"));
@@ -54,36 +54,81 @@ const options2 = [
   { id: 2, text: "ماركة", text: "ماركة" },
 ];
 
-const AddBillsList = () => {
+const confirmText = (record) => {
+  Swal.fire({
+    title: "هل أنت متأكد؟",
+    text: "لن تتمكن من التراجع عن هذا!",
+    type: "warning",
+    showCancelButton: !0,
+    cancelButtonText: "لا",
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "نعم",
+    confirmButtonClass: "btn btn-primary",
+    cancelButtonClass: "btn btn-danger ml-1",
+    buttonsStyling: !1,
+  })
+    .then(function (t) {
+      const data_send = {
+        caliber_id: record?.caliber_id,
+      };
+      axios
+        .post("", JSON.stringify(data_send))
+        .then((res) => {
+          if (res.data.status == "success") {
+            toast.success(res.data.message);
+          } else if (res.data.status == "error") {
+            toast.error(res.data.message);
+          } else {
+            toast.error("حدث خطأ ما");
+          }
+        })
+        .catch((err) => console.log(err));
+      // t.value &&
+      //   Swal.fire({
+      //     type: "success",
+      //     title: "تم المسح!",
+      //     text: "لقد تم حذف الملف الخاص بك",
+      //     confirmButtonClass: "btn btn-success",
+      //   });
+    })
+    .finally(() => {
+      // setdelloading({
+      //   id:null,
+      //   loading:false
+      // })
+    });
+};
+const MovesList = () => {
   const [inputfilter, setInputfilter] = useState(false);
-  const [store, setstore] = useState([]);
+  const [moves, setMoves] = useState([]);
   const [openPay, setOpenPay] = useState(false);
   const [currentRecord, setCurrendRecord] = useState({});
-  const [payModalOpen, setModalOpen] = useState(false);
 
   const dispatch = useDispatch();
   const handleGetAll = () => {
-    db.get("stores", function (err, value) {
-      setstore(value ? JSON.parse(value) : []);
+    db.get("movements", function (err, value) {
+      setMoves(value ? JSON.parse(value) : []);
     });
   };
-
-  console.log(store);
+  
   const handleShow = (record) => {
-    let allstore = [...store];
+    let allMoves = [...moves];
+    console.log(record);
+    console.log(allMoves)
     const hidden = record.hidden ? 0 : 1;
-    const index = allstore.findIndex((item) => item.id === record.id);
-    allstore.splice(index, 1, { ...record, hidden });
-    db.put("stores", JSON.stringify(allstore));
+    const index = allMoves.findIndex((item) => +item.id === +record.id);
+    allMoves.splice(index, 1, { ...record, hidden });
+    db.put("movements", JSON.stringify(allMoves));
     handleGetAll();
   };
   useEffect(() => {
     // 1) Create our store    d
-    db.get("stores", function (err, value) {
-      setstore(value ? JSON.parse(value) : []);
+    db.get("movements", function (err, value) {
+      setMoves(value ? JSON.parse(value) : []);
     });
   }, []);
-  console.log(store);
+console.log(moves)
   const togglefilter = (value) => {
     setInputfilter(value);
   };
@@ -92,113 +137,91 @@ const AddBillsList = () => {
 
   const columns = [
     {
-      title: "رقم",
-      dataIndex: "id",
+      title: " الفرع",
+      dataIndex: "branchName",
+      sorter: (a, b) => a.description.length - b.description.length,
+    },
+    // {
+    //   title: "شيك",
+    //   dataIndex: "check",
+    //   sorter: (a, b) => a.createdBy.length - b.createdBy.length,
+    // },
+    {
+      title: "الوصف",
+      dataIndex: "description",
       sorter: (a, b) => a.description.length - b.description.length,
     },
     {
-      title: "إسم المنتج",
-      dataIndex: "productName",
-      render: (text, record) => (
-        <div className="productimgname">
-          <Link to="#" className="product-img">
-            <img alt="" src={record?.image} />
-          </Link>
-          <Link to="#" style={{ fontSize: "15px", marginLeft: "10px" }}>
-            {record?.productName}
-          </Link>
-        </div>
-      ),
-      sorter: (a, b) => a.product_name.length - b.product_name.length,
-    },
-    {
-      title: "الفئه",
-      dataIndex: "category",
+      title: "الفارق",
+      dataIndex: "difference",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
-      title: "رقم المورد",
-      dataIndex: "customer_Number",
+      title: "نوع الحركه",
+      dataIndex: "movementType",
       sorter: (a, b) => a.description.length - b.description.length,
     },
     {
-      title: "اسم المورد",
-      dataIndex: "customer_name",
-      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
-    },
-    {
-      title: "هاتف المورد",
-      dataIndex: "customer_phone",
+      title: "نوع السند",
+      dataIndex: "movementType",
       sorter: (a, b) => a.description.length - b.description.length,
     },
     {
-      title: "التاريخ",
-      dataIndex: "documentDate",
+      title: "رقم الحساب",
+      dataIndex: "accountNumber",
+      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
+    },
+    {
+      title: "القسم",
+      dataIndex: "section",
       sorter: (a, b) => a.description.length - b.description.length,
     },
     {
-      title: "النوع",
-      dataIndex: "documentType",
+      title: "الفارق",
+      dataIndex: "difference",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
-      title: "الوزن",
-      dataIndex: "weight",
-      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
-    },
-
-    {
-      title: "نوع العنصر",
-      dataIndex: "itemType",
+      title: "نوع",
+      dataIndex: "customerType",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
-      title: "الكميه",
-      dataIndex: "quantity",
+      title: "اجمال عمله محليه",
+      dataIndex: "totalLocalCurrency",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
+    // {
+    //   title: "اجمالي ذهب عيار21",
+    //   dataIndex: "totalWeight21",
+    //   sorter: (a, b) => a.createdBy.length - b.createdBy.length,
+    // },
     {
-      title: "الدفعه المبدأيه",
-      dataIndex: "initialPayment",
-      sorter: (a, b) => a.description.length - b.description.length,
-    },
-    {
-      title: "دفع",
+      title: "تفاصيل",
       render: (_, record) => (
-        <>
+        <div>
           <button
             className="btn btn-submit me-2"
-            style={{
-              width: "40px",
-              height: "40px",
-              fontSize: "15px",
-              padding: "0px",
-            }}
+            style={{ width: "100px" }}
             onClick={() => {
-              setModalOpen(true);
+              setOpenPay(true);
               setCurrendRecord(record);
             }}
           >
-            دفع
+            عرض
           </button>
-        </>
+        </div>
       ),
     },
-    {
-      title: "الاجمالي",
-      dataIndex: "total",
-      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
-    },
-
     {
       title: "أوامر",
       render: (_, record) => (
         <>
-          <div style={{ display: "flex", gap: "20px", width: "max-content" }}>
-            <span
+          <div style={{ display: "flex", gap: "20px",width:"max-content" }}>
+            {/* <span
               style={{ cursor: "pointer" }}
               onClick={() => {
-                history.push("", {
+                history.push("/dream-pos/moves/edit-move", {
                   catdata: record,
                 });
                 dispatch(addItem(record));
@@ -206,22 +229,21 @@ const AddBillsList = () => {
               className="me-3"
             >
               <img src={EditIcon} alt="img" />
-            </span>
-            <Link
+            </span> */}
+            <span
               className="confirm-text"
               to="#"
               onClick={() => {
                 handleShow(record);
               }}
             >
-              {delloading.id == record?.caliber_id && delloading.loading ? (
-                <Loader />
-              ) : record?.hidden ? (
+              {
+              record?.hidden ? (
                 <VisibilityOffIcon />
               ) : (
                 <VisibilityIcon />
               )}
-            </Link>
+            </span>
           </div>
         </>
       ),
@@ -239,27 +261,20 @@ const AddBillsList = () => {
         <div className="content">
           <div className="page-header">
             <div className="page-title">
-              <h4>قائمه المنتجات المضافه للمخزن </h4>
+              <h4>قائمه حركات الذهب </h4>
               <h6>عرض وبحث فى القائمة</h6>
             </div>
             <div className="page-btn">
-              <Link
-                to="/dream-pos/store/add-to-store"
-                className="btn btn-added"
-              >
+              <Link to="/dream-pos/moves/move7" className="btn btn-added">
                 <img src={PlusIcon} alt="img" className="me-1" />
-                إضافه الي المخزن
+                إضافه حركه
               </Link>
             </div>
           </div>
           {/* /product list */}
           <div className="card">
             <div className="card-body">
-              <Tabletop
-                inputfilter={inputfilter}
-                togglefilter={togglefilter}
-                data={store}
-              />
+              <Tabletop inputfilter={inputfilter} togglefilter={togglefilter} data={moves}/>
               {/* /Filter */}
               <div
                 className={`card mb-0 ${inputfilter ? "toggleCls" : ""}`}
@@ -313,16 +328,12 @@ const AddBillsList = () => {
               </div>
               {/* /Filter */}
               <div className="table-responsive">
-                {store && store?.length ? (
+                {moves && moves?.length ? (
                   <>
-                    <ModalContent
-                      isOpen={payModalOpen}
-                      setOpen={setModalOpen}
-                      header="تفاصيل الدفعات الماليه"
-                    >
-                      <PayDetails data={currentRecord} />
+                    <Table columns={columns} dataSource={moves} />
+                    <ModalContent setOpen={setOpenPay} isOpen={openPay}>
+                      <Details data={currentRecord} />
                     </ModalContent>
-                    <Table columns={columns} dataSource={store} isPaginatoin={true}/>
                   </>
                 ) : (
                   "لا يوجد بيانات"
@@ -336,4 +347,4 @@ const AddBillsList = () => {
     </>
   );
 };
-export default AddBillsList;
+export default MovesList;

@@ -10,6 +10,7 @@ import Purchase from './purchase'
 import Supplier from './supplier'
 import Customer from './customer'
 import ReceiptsList from './Reciepts';
+import Retrives from './Retrives';
 
 
 
@@ -27,6 +28,8 @@ const AppIndex = ({ match}) =>(
         <Route path={`${match.url}/purchasereport`} component={Purchase} />
         <Route path={`${match.url}/supplierreport`} component={Supplier} />
         <Route path={`${match.url}/customerreport`} component={Customer} />
+        <Route path={`${match.url}/retrivesreport`} component={Retrives} />
+
 
     </Switch>
 )

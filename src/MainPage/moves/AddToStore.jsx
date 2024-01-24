@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-undef */
 /* eslint-disable react/jsx-key */
 /* eslint-disable no-unused-vars */
@@ -5,14 +6,11 @@ import React, { useEffect, useState } from "react";
 import leveljs from "level-js";
 import { toast } from "react-toastify";
 import "./style/main.css";
-import PayDetails from "./PayDetails";
 const levelup = require("levelup");
-import { Loader } from "feather-icons-react/build/IconComponents";
-import { Upload } from "../../EntryFile/imagePath";
 
 const db = levelup(leveljs("./db"));
 
-const AddToStore = () => {
+const AddToStore = ({ data }) => {
   const [allData, setAllData] = useState([]);
   const [calibers, setCalibers] = useState([]);
   const [customerNumber, setCustomerNumber] = useState("");
@@ -20,8 +18,6 @@ const AddToStore = () => {
   const [store, setStore] = useState([]);
   const [isPriceWithCaliber, setIsPriceWithCaliber] = useState(true);
   const [categories, setCategories] = useState([]);
-  const [img, setimg] = useState(null);
-  const [imgloading, setimgloading] = useState(false);
 
   const [formData, setFormData] = useState({
     id: store.length + 1,
@@ -45,8 +41,10 @@ const AddToStore = () => {
     remain: 0,
     totalPayments: 0,
     moveType: "اضافه",
+    ...data,
     PayDetails: [{ date: new Date(), id: 1, total: 0 }],
   });
+  const [movements, setMovements] = useState([]);
   console.log(calibers);
   console.log(allData);
   const calculateTotal = () => {
@@ -67,25 +65,12 @@ const AddToStore = () => {
     }
   };
 
-  const handleImgUpload = (e) => {
-    var reader = new FileReader();
-    reader.onloadend = function () {
-      if (reader.readyState === FileReader.DONE) {
-        const base64Image = reader.result;
-        setimg(base64Image);
-
-        setFormData({ ...formData, image: base64Image });
-      }
-    };
-    reader.onerror = function (error) {
-      console.log("Error reading file:", error);
-    };
-    reader.readAsDataURL(e.target.files[0]);
-  };
-
   useEffect(() => {
     db.get("categories", function (err, value) {
       setCategories(value ? JSON.parse(value) : []);
+    });
+    db.get("movements", function (err, value) {
+      setMovements(value ? JSON.parse(value) : []);
     });
   }, []);
 
@@ -164,11 +149,7 @@ const AddToStore = () => {
       {
         ...formData,
         PayDetails: [
-          {
-            date: new Date(),
-            id: store.length + 1,
-            total: formData.initialPayment,
-          },
+          { date: new Date(), id: 1, total: formData.initialPayment },
         ],
         remain: formData.total - formData.initialPayment,
         totalPayments: formData.initialPayment,
@@ -178,42 +159,41 @@ const AddToStore = () => {
       if (err) {
         toast.success("حدث خطأ");
       } else {
-        toast.success("تمت الاضافه بنجاح");
+        toast.success("تمت الاضافه للمخزن بنجاح");
       }
     });
 
-    setFormData({
-      id: store.length + 1,
-      documentType: "سند استلام",
-      itemType: "",
-      customer_Number: "",
-      customer_name: "",
-      caliber: "",
-      branchName: "",
-      documentDate: new Date().toISOString().split("T")[0],
-      quantity: "",
-      weight: "",
-      date: "",
-      initialPayment: "",
-      itemPrice: "",
-      total: "",
-      isPriceWithCaliber: true,
-      productName: "",
-      category: "",
-      caliberPrice: 0,
-      remain: 0,
-      totalPayments: 0,
-      moveType: "اضافه",
-      PayDetails: [{ date: new Date(), id: 1, total: 0 }],
+    const newData = [
+      ...movements,
+      {
+        ...formData,
+        PayDetails: [
+          { date: new Date(), id: 1, total: formData.initialPayment },
+        ],
+        remain: formData.total - formData.initialPayment,
+        totalPayments: formData.initialPayment,
+      },
+    ];
+
+    db.put("movements", JSON.stringify(newData), function (err) {
+      if (err) {
+        console.error("Error saving to database", err);
+        toast.error("حدثت مشكلة أثناء الحفظ في قاعدة البيانات");
+      } else {
+        toast.success("تمت  اضافة الحركه");
+      }
     });
   };
   console.log(store);
   return (
-    <div className="page-wrapper">
-      <div className="content">
-        <div className="inputs-container">
+    <div className="">
+      <div className="">
+        <div
+          className="inputs-container"
+          style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}
+        >
           <div className="cus-row row1">
-            <div className="form-group ful-width">
+            {/* <div className="form-group ful-width">
               <label>نوع السند</label>
               <select
                 name="documentType"
@@ -224,8 +204,8 @@ const AddToStore = () => {
               >
                 <option value="سند استلام">سند استلام</option>
               </select>
-            </div>
-            <div className="form-group equal-width">
+            </div> */}
+            <div className="form-group ">
               <label>نوع العنصر</label>
               <select
                 name="itemType"
@@ -237,7 +217,7 @@ const AddToStore = () => {
               </select>
             </div>
 
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>رقم المورد</label>
               <input
                 type="text"
@@ -245,7 +225,7 @@ const AddToStore = () => {
                 value={customerNumber}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>اسم المنتج</label>
               <input
                 type="text"
@@ -255,7 +235,7 @@ const AddToStore = () => {
               />
             </div>
 
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>اسم المورد</label>
               <input
                 type="text"
@@ -265,7 +245,7 @@ const AddToStore = () => {
               />
             </div>
 
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>العيار</label>
               <input
                 type="text"
@@ -274,7 +254,7 @@ const AddToStore = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>الفئه</label>
               <select
                 name="category"
@@ -290,7 +270,7 @@ const AddToStore = () => {
             </div>
           </div>
           <div className="cus-row row2">
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>اسم الفرع</label>
               <input
                 type="text"
@@ -299,7 +279,7 @@ const AddToStore = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>{isPriceWithCaliber ? "سعر بالعيار" : "سعر يدوي"}</label>
               <label className="toggle-switch">
                 <input
@@ -314,7 +294,7 @@ const AddToStore = () => {
               </label>
             </div>
 
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>الكمية</label>
               <input
                 type="text"
@@ -323,7 +303,7 @@ const AddToStore = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>الوزن</label>
               <input
                 type="text"
@@ -332,7 +312,7 @@ const AddToStore = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>تاريخ</label>
               <input
                 type="date"
@@ -342,7 +322,7 @@ const AddToStore = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>الدفعة المبدئية</label>
               <input
                 type="text"
@@ -351,7 +331,7 @@ const AddToStore = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>
                 {isPriceWithCaliber
                   ? "سعر الوحده بالعيار"
@@ -364,7 +344,7 @@ const AddToStore = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group equal-width">
+            <div className="form-group ">
               <label>
                 {isPriceWithCaliber ? "الاجمالي" : "قم بادخال السعر"}
               </label>
@@ -377,71 +357,6 @@ const AddToStore = () => {
             </div>
           </div>
         </div>
-        <div className="col-lg-12">
-          <div className="form-group">
-            <label> صورةالمنتج</label>
-            <div className="image-upload">
-              <input onChange={(e) => handleImgUpload(e)} type="file" />
-              <div className="image-uploads">
-                <img src={Upload} alt="img" />
-                <h4>قم بسحب وإسقاط الملف للتحميل</h4>
-              </div>
-            </div>
-            <div
-              style={{
-                textAlign: "center",
-              }}
-            >
-              {/* <button
-                        disabled={imgloading}
-                        onClick={() => {
-                          handleuploadimg();
-                        }}
-                        style={{
-                          cursor: imgloading ? "no-drop" : "pointer",
-                          width: "200px",
-                          padding: "10px",
-                          borderRadius: "10px",
-                          border: "none",
-                          backgroundColor: "#ffc107",
-                          color: "white",
-                        }}
-                      >
-                        {imgloading ? <Loader /> : "رفع الصوره"}
-                      </button> */}
-            </div>
-          </div>
-        </div>
-        {img ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flexDirection: "column",
-              gap: "10px",
-              margin: "10px 0",
-            }}
-          >
-            <img src={img} alt="" style={{ width: "250px" }} />
-            <button
-              disabled={imgloading}
-              onClick={() => {
-                setimg(false);
-              }}
-              style={{
-                cursor: imgloading ? "no-drop" : "pointer",
-                width: "200px",
-                padding: "10px",
-                borderRadius: "10px",
-                border: "none",
-                backgroundColor: "#ffc107",
-                color: "white",
-              }}
-            >
-              {imgloading ? <Loader /> : "حذف الصوره"}
-            </button>
-          </div>
-        ) : null}
         <div style={{ marginTop: "50px" }}>
           <button className="btn btn-submit me-2" onClick={saveData}>
             اضافه

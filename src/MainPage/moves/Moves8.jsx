@@ -1,11 +1,11 @@
-
-
 /* eslint-disable no-unused-vars */
 
 import React, { useEffect, useState } from "react";
 import "./style/main.css";
 import leveljs from "level-js";
 import { toast } from "react-toastify";
+import { getCurrentDate } from "../../functions/uniqeId";
+import AddToStore from "./AddToStore";
 
 const levelup = require("levelup");
 const generateUniqueId = () => {
@@ -17,14 +17,14 @@ const generateUniqueId = () => {
 };
 const Moves8 = () => {
   const [allData, setAllData] = useState([]);
-
+  const [calibers, setCalibers] = useState([]);
 
   const [formData, setFormData] = useState({
-    id: allData.length +1,
+    id: allData.length + 1,
     // section: "",
-    // movementType: "",
+    movementType: "حركة صرف",
     // documentType: "",
-    // number: "",
+    // accountNumber: "",
     check: false,
     // branchName: "",
     // documentEntry: "",
@@ -51,7 +51,7 @@ const Moves8 = () => {
     // totalLocalCurrency: "",
     // totalWeight21: "",
     // difference: "",
-    // selectedType: "",
+    // customerType: "",
     // wayToPay: "",
     // row3_paymentMethod: "",
     // row3_goldWeight24: "",
@@ -63,21 +63,143 @@ const Moves8 = () => {
     // row7_goldWeight22: "",
     // row7_goldWeight21: "",
     // row7_goldWeight18: "",
+    documentDate: getCurrentDate(),
+    goldItems: [{ carat: "", weight: "" }],
+    difference: 0,
   });
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: value,
-        id:allData.length +1
-      }));
-    
+  const calculateTotalPrice = (goldItems) => {
+    console.log("totalPrice");
+
+    if (!Array.isArray(goldItems)) {
+      return 0;
+    }
+
+    if (calibers.length === 0) {
+      return 0;
+    }
+
+    const totalPrice = goldItems.reduce((total, item) => {
+      const carat = item.carat;
+      const weight = parseFloat(item.weight);
+
+      const caratPrice =
+        calibers.find((c) => c.caliber_name === carat)?.price || 0;
+
+      return total + weight * caratPrice;
+    }, 0);
+
+    return totalPrice;
   };
+
+  console.log(calibers);
+
+  // const handleInputChange = (e) => {
+  //   const { name, type, checked, value } = e.target;
+  //         console.log("totalPrice")
+  //         const totalPrice = calculateTotalPrice(formData.goldItems);
+
+  //   if (name.startsWith("goldItems")) {
+  //     const [index, itemName] = name.split("_").slice(1);
+  //     setFormData((prevFormData) => {
+  //       const newGoldItems = [...prevFormData.goldItems];
+  //       newGoldItems[index][itemName] = type === 'checkbox' ? checked : value;
+  //       const totalPrice = calculateTotalPrice(newGoldItems);
+
+  //       return {
+  //         ...prevFormData,
+  //         goldItems: newGoldItems,
+  //         totalGoldPrice: totalPrice,
+
+  //       };
+  //     });
+  //   } else {
+  //     setFormData((prevFormData) => {
+  //       let updatedFormData = {
+  //         ...prevFormData,
+  //         [name]: type === 'checkbox' ? checked : value,
+  //         totalGoldPrice: totalPrice,
+  //         caliberDifferenceAmount:totalPrice - formData.fundBank ,
+  //         difference: formData.totalGoldPrice > formData.fundBank ? "فارق لنا" : "فارق عليهم"
+  //       };
+
+  //       // Reset goldItems and row3_moneyAmount when payment method changes
+  //       if (name === "row3_paymentMethod") {
+  //         updatedFormData = {
+  //           ...updatedFormData,
+  //           goldItems: [{ carat: "", weight: "" }],
+  //           row3_moneyAmount: "",
+  //         };
+  //       }
+
+  //       return updatedFormData;
+  //     });
+  //   }
+  // };
+
+  const handleInputChange = (e) => {
+    const { name, type, checked, value } = e.target;
+
+    if (name.startsWith("goldItems")) {
+      const [index, itemName] = name.split("_").slice(1);
+      setFormData((prevFormData) => {
+        const newGoldItems = [...prevFormData.goldItems];
+        newGoldItems[index][itemName] = type === "checkbox" ? checked : value;
+
+        return {
+          ...prevFormData,
+          goldItems: newGoldItems,
+        };
+      });
+    } else {
+      setFormData((prevFormData) => {
+        let updatedFormData = {
+          ...prevFormData,
+          [name]: type === "checkbox" ? checked : value,
+        };
+
+        // Reset goldItems and row3_moneyAmount when payment method changes
+        if (name === "row3_paymentMethod") {
+          updatedFormData = {
+            ...updatedFormData,
+            goldItems: [{ carat: "", weight: "" }],
+            row3_moneyAmount: "",
+          };
+        }
+
+        return updatedFormData;
+      });
+    }
+
+    setFormData((prevFormData) => {
+      const totalPrice =
+        (calculateTotalPrice(prevFormData.goldItems) || 0) +
+        +prevFormData.row3_moneyAmount;
+
+      return {
+        ...prevFormData,
+        totalGoldPrice: totalPrice,
+        caliberDifferenceAmount: totalPrice - prevFormData.fundBank || 0,
+        difference:
+          +totalPrice > +prevFormData.fundBank ? "فارق لهم" : "فارق لنا",
+        afterDiscountAmount:
+          +prevFormData.caliberDifferenceAmount -
+            (+prevFormData.caliberDifferenceAmount *
+              +prevFormData.discountAmount) /
+              100 || 0,
+      };
+    });
+  };
+
+  // useEffect(() => {
+  //   // Run calculations when formData changes
+
+  // }, [formData]);
+
   const db = levelup(leveljs("./db"));
   const handleAdd = () => {
     setAllData((prevAllData) => {
-      const newData = [...prevAllData, formData];
+      const newData = [...prevAllData, {...formData, id: allData.length + 1,totalLocalCurrency : formData.afterDiscountAmount}];
       db.put("movements", JSON.stringify(newData), function (err) {
         if (err) {
           console.error("Error saving to database", err);
@@ -89,14 +211,56 @@ const Moves8 = () => {
       return newData;
     });
   };
-  
-//   console.log(allData);
-    useEffect(() => {
-      db.get("movements", function (err, value) {
-        setAllData(value ? JSON.parse(value) : []);
-      });
+  console.log(formData);
+  useEffect(() => {
+    db.get("movements", function (err, value) {
+      setAllData(value ? JSON.parse(value) : []);
+    });
+  }, []);
 
-    }, []);
+  useEffect(() => {
+    db.get("calibers", function (err, value) {
+      setCalibers(value ? JSON.parse(value) : []);
+    });
+  }, []);
+  const handleGoldItemChange = (index, name, value) => {
+    // setFormData((prevFormData) => {
+    //   const newGoldItems = [...prevFormData.goldItems];
+    //   newGoldItems[index][name] = value;
+    //   return {
+    //     ...prevFormData,
+    //     goldItems: newGoldItems,
+    //   };
+    // });
+    setFormData((prevFormData) => {
+      const totalPrice =
+        (calculateTotalPrice(prevFormData.goldItems) || 0) +
+        +prevFormData.row3_moneyAmount;
+        const newGoldItems = [...prevFormData.goldItems];
+        newGoldItems[index][name] = value;
+      return {
+        ...prevFormData,
+        totalGoldPrice: totalPrice,
+        goldItems: newGoldItems,
+
+        caliberDifferenceAmount: totalPrice - prevFormData.fundBank || 0,
+        difference:
+          +totalPrice > +prevFormData.fundBank ? "فارق لهم" : "فارق لنا",
+        afterDiscountAmount:
+          +prevFormData.caliberDifferenceAmount -
+            (+prevFormData.caliberDifferenceAmount *
+              +prevFormData.discountAmount) /
+              100 || 0,
+      };
+    });
+  };
+
+  const handleAddGoldItem = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      goldItems: [...prevFormData.goldItems, { carat: "", weight: "" }],
+    }));
+  };
 
   return (
     <div className="page-wrapper">
@@ -122,9 +286,10 @@ const Moves8 = () => {
               value={formData.movementType}
               onChange={handleInputChange}
             >
-              <option value="سند صرف">سند صرف</option>
-              <option value="سند استلام">سند استلام</option>
-            </select>{" "}
+              <option value="حركة صرف">حركة صرف</option>
+              <option value="حركة قبض">حركة قبض</option>
+              <option value="حركه نقديه">حركه نقديه</option>
+            </select>
           </div>
           <div className="form-group equal-width">
             <label>نوع السند</label>
@@ -142,8 +307,8 @@ const Moves8 = () => {
             <label>الرقم</label>
             <input
               type="text"
-              name="number"
-              value={formData.number}
+              name="accountNumber"
+              value={formData.accountNumber}
               onChange={handleInputChange}
             />
           </div>
@@ -160,96 +325,105 @@ const Moves8 = () => {
             </label>
           </div>
         </div>
-        <div className="cus-row row2">
-          <div className="form-group equal-width">
-            <label>اسم الفرع</label>
-            <input
-              type="text"
-              name="branchName"
-              value={formData.branchName}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group equal-width">
-            <label>مدخل السند</label>
-            <input
-              type="text"
-              name="documentEntry"
-              value={formData.documentEntry}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group equal-width">
-            <label>تاريخ السند</label>
-            <input
-              type="date"
-              name="documentDate"
-              value={formData.documentDate}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group full-width">
-            <label> الوصف</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-            ></textarea>
-          </div>
-        </div>
-        {/* Continue adding similar code for the remaining input fields */}
-        <div className="row4">
-          <div className="form-group">
-            <label>اختر النوع</label>
-            <select
-              name="selectedType"
-              value={formData.selectedType}
-              onChange={handleInputChange}
-            >
-              <option value="مورد">مورد</option>
-              <option value="عميل">عميل</option>
-              <option value="حساب">حساب</option>
-            </select>
-          </div>
-          <div className="form-group input">
-            <label>
-              رمز
-              {formData.selectedType === "supplier"
-                ? "المورد"
-                : formData.selectedType === "customer"
-                ? "العميل"
-                : formData.selectedType === "account"
-                ? "الحساب"
-                : ""}
-            </label>
-            <input
-              type="text"
-              name="supplierCode"
-              value={formData.supplierCode}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group input">
-            <label htmlFor="">
-              اسم{" "}
-              {formData.selectedType === "supplier"
-                ? "المورد"
-                : formData.selectedType === "customer"
-                ? "العميل"
-                : formData.selectedType === "account"
-                ? " الحساب"
-                : ""}
-            </label>
-            <input
-              type="text"
-              name="radioText"
-              value={formData.radioText}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
+        {formData.movementType === "حركة قبض" && (
+          <>
+            <AddToStore data={formData} />
+          </>
+        )}
 
-        <div className="row3">
+        {formData.movementType === "حركة صرف" && (
+          <>
+            <div className="cus-row row2">
+              <div className="form-group equal-width">
+                <label>اسم الفرع</label>
+                <input
+                  type="text"
+                  name="branchName"
+                  value={formData.branchName}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group equal-width">
+                <label>مدخل السند</label>
+                <input
+                  type="text"
+                  name="documentEntry"
+                  value={formData.documentEntry}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group equal-width">
+                <label>تاريخ السند</label>
+                <input
+                  type="date"
+                  name="documentDate"
+                  value={formData.documentDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            <div className="row">
+              <div className="form-group full-width">
+                <label> الوصف</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                ></textarea>
+              </div>
+            </div>
+            <div className="row4">
+              <div className="form-group">
+                <label>اختر النوع</label>
+                <select
+                  name="customerType"
+                  value={formData.customerType}
+                  onChange={handleInputChange}
+                >
+                  <option value="مورد">مورد</option>
+                  <option value="عميل">عميل</option>
+                  <option value="حساب">حساب</option>
+                </select>
+              </div>
+              <div className="form-group input">
+                <label>
+                  رمز
+                  {formData.customerType === "supplier"
+                    ? "المورد"
+                    : formData.customerType === "customer"
+                    ? "العميل"
+                    : formData.customerType === "account"
+                    ? "الحساب"
+                    : ""}
+                </label>
+                <input
+                  type="text"
+                  name="supplierCode"
+                  value={formData.supplierCode}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group input">
+                <label htmlFor="">
+                  اسم{" "}
+                  {formData.customerType === "supplier"
+                    ? "المورد"
+                    : formData.customerType === "customer"
+                    ? "العميل"
+                    : formData.customerType === "account"
+                    ? " الحساب"
+                    : ""}
+                </label>
+                <input
+                  type="text"
+                  name="radioText"
+                  value={formData.radioText}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            {/* <div className="row3">
           <h5>ذهب كسر مدفوع من صنادق الكسر</h5>
           <div className="column1">
             <div className="form-group input">
@@ -301,67 +475,207 @@ const Moves8 = () => {
               />
             </div>
           </div>
-        </div>
-        <div className="row5">
-          <div className="form-group equal-width">
-            <label>مدفوع من الصندوق\البنك</label>
-            <input
-              type="text"
-              name="fundBank"
-              value={formData.fundBank}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group equal-width">
-            <label>اجمالي الذهب الكسر</label>
-            <input
-              type="text"
-              name="totalGoldBroken"
-              value={formData.totalGoldBroken}
-              onChange={handleInputChange}
-            />
-          </div>{" "}
-          <div className="form-group equal-width">
-            <label>حساب الصندوق\البنك</label>
-            <input
-              type="text"
-              name="fundAccount"
-              value={formData.fundAccount}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
-        <div className="row6">
-          <div className="form-group equal-width">
-            <label>مبلغ فارق العيار</label>
-            <input
-              type="text"
-              name="caliberDifferenceAmount"
-              value={formData.caliberDifferenceAmount}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group equal-width">
-            <label>مبلغ الخصم</label>
-            <input
-              type="text"
-              name="discountAmount"
-              value={formData.discountAmount}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>اختر الفارق</label>
-            <select
-              name="difference"
-              value={formData.difference}
-              onChange={handleInputChange}
-            >
-              <option value="فارق لنا">فارق لنا</option>
-              <option value="فارق بهم">فارق لهم</option>
-            </select>
-          </div>
-          <div className="form-group equal-width">
+        </div> */}
+
+            <div className="row3">
+              <h5>ذهب كسر مدفوع من صنادق الكسر</h5>
+              <div className="column1">
+                <div className="form-group input">
+                  <label>طريقة الدفع</label>
+                  <select
+                    name="row3_paymentMethod"
+                    value={formData.row3_paymentMethod}
+                    onChange={handleInputChange}
+                  >
+                    <option value="ذهب كسر">ذهب كسر </option>
+                    <option value="مبالغ ماليه">مبالغ ماليه</option>
+                    <option value="ذهب كسر ومبالغ ماليه">
+                      ذهب كسر و مبالغ ماليه
+                    </option>
+                  </select>
+                </div>
+
+                {/* Conditional rendering based on selected payment method */}
+                {formData.row3_paymentMethod === "ذهب كسر" && (
+                  <div>
+                    {formData.goldItems.map((item, index) => (
+                      <div
+                        style={{ display: "flex", gap: "20px", width: "100%" }}
+                        key={index}
+                      >
+                        <div className="form-group input">
+                          <label>عيار {formData.goldItems[index].carat}</label>
+                          <input
+                            type="text"
+                            value={item.carat}
+                            onChange={(e) =>
+                              handleGoldItemChange(
+                                index,
+                                "carat",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="form-group input">
+                          <label>
+                            الوزن للعيار {formData.goldItems[index].carat}
+                          </label>
+                          <input
+                            type="text"
+                            value={item.weight}
+                            onChange={(e) =>
+                              handleGoldItemChange(
+                                index,
+                                "weight",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      className="btn btn-submit me-2"
+                      onClick={handleAddGoldItem}
+                    >
+                      إضافة عيار جديد
+                    </button>
+                  </div>
+                )}
+
+                {formData.row3_paymentMethod === "مبالغ ماليه" && (
+                  <div className="form-group input">
+                    <label>المبلغ المالي المدفوع</label>
+                    <input
+                      type="text"
+                      name="row3_moneyAmount"
+                      value={formData.row3_moneyAmount}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                )}
+
+                {formData.row3_paymentMethod === "ذهب كسر ومبالغ ماليه" && (
+                  <div>
+                    <div className="form-group input">
+                      <label>المبلغ المالي المدفوع</label>
+                      <input
+                        type="text"
+                        name="row3_moneyAmount"
+                        value={formData.row3_moneyAmount}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+
+                    {formData.goldItems.map((item, index) => (
+                      <div
+                        style={{ display: "flex", gap: "20px", width: "100%" }}
+                        key={index}
+                      >
+                        <div className="form-group input">
+                          <label>عيار {formData.goldItems[index].carat}</label>
+                          <input
+                            type="text"
+                            value={item.carat}
+                            onChange={(e) =>
+                              handleGoldItemChange(
+                                index,
+                                "carat",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="form-group input">
+                          <label>
+                            الوزن للعيار {formData.goldItems[index].carat}
+                          </label>
+                          <input
+                            type="text"
+                            value={item.weight}
+                            onChange={(e) =>
+                              handleGoldItemChange(
+                                index,
+                                "weight",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      className="btn btn-submit me-2"
+                      onClick={handleAddGoldItem}
+                    >
+                      إضافة عيار جديد
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="row5">
+              <div className="form-group equal-width">
+                <label>مدفوع من الصندوق\البنك</label>
+                <input
+                  type="text"
+                  name="fundBank"
+                  value={formData.fundBank}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group equal-width">
+                <label>اجمالي الذهب الكسر</label>
+                <input
+                  type="text"
+                  name="totalGoldBroken"
+                  value={formData.totalGoldBroken}
+                  onChange={handleInputChange}
+                />
+              </div>{" "}
+              <div className="form-group equal-width">
+                <label>حساب الصندوق\البنك</label>
+                <input
+                  type="text"
+                  name="fundAccount"
+                  value={formData.fundAccount}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            <div className="row6">
+              <div className="form-group equal-width">
+                <label>مبلغ فارق العيار</label>
+                <input
+                  type="text"
+                  name="caliberDifferenceAmount"
+                  value={formData.caliberDifferenceAmount}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group equal-width">
+                <label>مبلغ الخصم</label>
+                <input
+                  type="text"
+                  name="discountAmount"
+                  value={formData.discountAmount}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group">
+                <label>اختر الفارق</label>
+                <select
+                  name="difference"
+                  value={formData.difference}
+                  onChange={handleInputChange}
+                >
+                  <option value="فارق لنا">فارق لنا</option>
+                  <option value="فارق لهم">فارق لهم</option>
+                </select>
+              </div>
+              {/* <div className="form-group equal-width">
             <label>حساب فارق العيار</label>
             <input
               type="text"
@@ -369,19 +683,19 @@ const Moves8 = () => {
               value={formData.caliberDifferenceAmount}
               onChange={handleInputChange}
             />
-          </div>{" "}
-          <div className="form-group equal-width">
-            <label>حساب الخصم</label>
-            <input
-              type="text"
-              name="discountAmount"
-              value={formData.discountAmount}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
+          </div>{" "} */}
+              <div className="form-group equal-width">
+                <label>حساب بعد الخصم</label>
+                <input
+                  type="text"
+                  name="afterDiscountAmount"
+                  value={formData.afterDiscountAmount}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
 
-<div className="row7">
+            {/* <div className="row7">
   <h5>طريقة السداد</h5>
   <div className="column1">
     <div className="form-group">
@@ -445,38 +759,127 @@ const Moves8 = () => {
       />
     </div>
   </div>
-</div>
+</div> */}
 
-
-        <div className="row8">
-          <h5>اجماليات السند</h5>
-          <div className="column1">
-            <div className="form-group input">
-              <label> الاجمالي عمله محليه</label>
-              <input
-                type="text"
-                name="totalLocalCurrency"
-                value={formData.totalLocalCurrency}
-                onChange={handleInputChange}
-              />
+            <div className="row8">
+              <h5>اجماليات السند</h5>
+              <div className="column1">
+                <div className="form-group input">
+                  <label> الاجمالي عمله محليه</label>
+                  <input
+                    type="text"
+                    name="totalLocalCurrency"
+                    value={formData.afterDiscountAmount}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group input">
+                  <label> الاجمالي الوزن عيار21</label>
+                  <input
+                    type="text"
+                    name="totalWeight21"
+                    value={formData.totalWeight21}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="form-group input">
-              <label> الاجمالي الوزن عيار21</label>
-              <input
-                type="text"
-                name="totalWeight21"
-                value={formData.totalWeight21}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-        </div>
-        <button className="btn btn-submit me-2" onClick={handleAdd}>
-          اضافه
-        </button>
+            <button className="btn btn-submit me-2" onClick={handleAdd}>
+              اضافه
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 };
 
 export default Moves8;
+
+//  <div className="row3">
+//           <h5>ذهب كسر مدفوع من صنادق الكسر</h5>
+//           <div className="column1">
+//             <div className="form-group input">
+//               <label>طريقة الدفع</label>
+//               <select
+//                 name="row3_paymentMethod"
+//                 value={formData.row3_paymentMethod}
+//                 onChange={handleInputChange}
+//               >
+//                 <option value="ذهب كسر">ذهب كسر </option>
+//                 <option value="مبالغ ماليه">مبالغ ماليه</option>
+//                 <option value="ذهب كسر ومبالغ ماليه">
+//                   ذهب كسر و مبالغ ماليه
+//                 </option>
+//               </select>
+//             </div>
+
+//             {/* Conditional rendering based on selected payment method */}
+//             {formData.row3_paymentMethod === "ذهب كسر" && (
+//               <div>
+//                 <div className="form-group input">
+//                   <label>عيار الذهب</label>
+//                   <input
+//                     type="text"
+//                     name="row3_goldCarat"
+//                     value={formData.row3_goldCarat}
+//                     onChange={handleInputChange}
+//                   />
+//                 </div>
+//                 <div className="form-group input">
+//                   <label>وزن الذهب</label>
+//                   <input
+//                     type="text"
+//                     name="row3_goldWeight"
+//                     value={formData.row3_goldWeight}
+//                     onChange={handleInputChange}
+//                   />
+//                 </div>
+//               </div>
+//             )}
+
+//             {formData.row3_paymentMethod === "مبالغ ماليه" && (
+//               <div className="form-group input">
+//                 <label>المبلغ المالي المدفوع</label>
+//                 <input
+//                   type="text"
+//                   name="row3_moneyAmount"
+//                   value={formData.row3_moneyAmount}
+//                   onChange={handleInputChange}
+//                 />
+//               </div>
+//             )}
+
+//             {formData.row3_paymentMethod === "ذهب كسر ومبالغ ماليه" && (
+//               <div>
+//                 <div className="form-group input">
+//                   <label>عيار الذهب</label>
+//                   <input
+//                     type="text"
+//                     name="row3_goldCarat"
+//                     value={formData.row3_goldCarat}
+//                     onChange={handleInputChange}
+//                   />
+//                 </div>
+//                 <div className="form-group input">
+//                   <label>وزن الذهب</label>
+//                   <input
+//                     type="text"
+//                     name="row3_goldWeight"
+//                     value={formData.row3_goldWeight}
+//                     onChange={handleInputChange}
+//                   />
+//                 </div>
+//                 <div className="form-group input">
+//                   <label>المبلغ المالي المدفوع</label>
+//                   <input
+//                     type="text"
+//                     name="row3_moneyAmount"
+//                     value={formData.row3_moneyAmount}
+//                     onChange={handleInputChange}
+//                   />
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>

@@ -4,6 +4,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   editItem: {},
+  printItem:{},
 };
 
 const editItemSlice = createSlice({
@@ -13,6 +14,9 @@ const editItemSlice = createSlice({
     addItem: (state, action) => {
       state.editItem = action.payload;
     },
+    setPrintItem:(state, action)=>{
+      state.printItem = action.payload
+    }
   },
 });
 

@@ -418,13 +418,14 @@ const AddReceipt = () => {
   const handleAddBill = () => {
     const updatedData = [...allData, { ...tableData, id: allData.length + 1 }];
     db.put("receipts", JSON.stringify(updatedData), function (err) {
-      if (err) {
-        console.error("Error saving to database", err);
-        toast.error("حدثت مشكلة أثناء الحفظ في قاعدة البيانات");
-      } else {
+      // if (err) {
+      //   console.error("Error saving to database", err);
+      //   toast.error("حدثت مشكلة أثناء الحفظ في قاعدة البيانات");
+      // } else {
+      // }
+    }
+    );
         toast.success("تمت الإضافة بنجاح");
-      }
-    });
 
     setTableData({
       bills: [

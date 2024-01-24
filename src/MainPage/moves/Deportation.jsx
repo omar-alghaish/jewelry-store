@@ -43,8 +43,8 @@ const Deportation = () => {
     handleGetAll();
   };
 
-  const shouldDisplayData = (startTime && endTime) || (startMove && endMove ) || movementTypeFilter;
-
+  const shouldDisplayData =
+    (startTime && endTime) || (startMove && endMove) || movementTypeFilter;
 
   const applyFilters = () => {
     let filteredData = [...moves];
@@ -109,7 +109,7 @@ const Deportation = () => {
       }
     });
   };
-  console.log(mainData)
+  console.log(mainData);
   useEffect(() => {
     db.get("mainData", function (err, value) {
       setMainData(value ? JSON.parse(value) : []);
@@ -127,35 +127,42 @@ const Deportation = () => {
     {
       title: " الفرع",
       dataIndex: "branchName",
+      sorter: (a, b) => a.description.length - b.description.length,
     },
-    {
-      title: "شيك",
-      dataIndex: "check",
-    },
+    // {
+    //   title: "شيك",
+    //   dataIndex: "check",
+    //   sorter: (a, b) => a.createdBy.length - b.createdBy.length,
+    // },
     {
       title: "الوصف",
       dataIndex: "description",
+      sorter: (a, b) => a.description.length - b.description.length,
     },
     {
       title: "الفارق",
       dataIndex: "difference",
+      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
       title: "نوع الحركه",
       dataIndex: "movementType",
+      sorter: (a, b) => a.description.length - b.description.length,
     },
     {
       title: "نوع السند",
       dataIndex: "movementType",
+      sorter: (a, b) => a.description.length - b.description.length,
     },
     {
-      title: "رمز",
-      dataIndex: "number",
+      title: "رقم الحساب",
+      dataIndex: "accountNumber",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
       title: "القسم",
       dataIndex: "section",
+      sorter: (a, b) => a.description.length - b.description.length,
     },
     {
       title: "الفارق",
@@ -164,7 +171,7 @@ const Deportation = () => {
     },
     {
       title: "نوع",
-      dataIndex: "selectedType",
+      dataIndex: "customerType",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
     {
@@ -172,11 +179,11 @@ const Deportation = () => {
       dataIndex: "totalLocalCurrency",
       sorter: (a, b) => a.createdBy.length - b.createdBy.length,
     },
-    {
-      title: "اجمالي ذهب عيار21",
-      dataIndex: "totalWeight21",
-      sorter: (a, b) => a.createdBy.length - b.createdBy.length,
-    },
+    // {
+    //   title: "اجمالي ذهب عيار21",
+    //   dataIndex: "totalWeight21",
+    //   sorter: (a, b) => a.createdBy.length - b.createdBy.length,
+    // },
     {
       title: "تفاصيل",
       render: (_, record) => (
@@ -198,8 +205,8 @@ const Deportation = () => {
       title: "أوامر",
       render: (_, record) => (
         <>
-          <div style={{ display: "flex", gap: "20px", width: "max-content" }}>
-            <span
+          <div style={{ display: "flex", gap: "20px",width:"max-content" }}>
+            {/* <span
               style={{ cursor: "pointer" }}
               onClick={() => {
                 history.push("/dream-pos/moves/edit-move", {
@@ -210,7 +217,7 @@ const Deportation = () => {
               className="me-3"
             >
               <img src={EditIcon} alt="img" />
-            </span>
+            </span> */}
             <Link
               className="confirm-text"
               to="#"
@@ -218,18 +225,24 @@ const Deportation = () => {
                 handleShow(record);
               }}
             >
-              {record?.hidden ? <VisibilityOffIcon /> : <VisibilityIcon />}
+              {
+               record?.hidden ? (
+                <VisibilityOffIcon />
+              ) : (
+                <VisibilityIcon />
+              )}
             </Link>
           </div>
         </>
       ),
     },
   ];
-
   return (
     <div className="page-wrapper">
       <div className="content">
         <div className="header1">
+                  <h3>ترحيل حركات</h3>
+
           <div className="time-row row">
             <div className="form-group equal-width">
               <label>من تاريخ</label>
@@ -278,8 +291,9 @@ const Deportation = () => {
                 value={movementTypeFilter}
                 onChange={handleInputChange}
               >
-                <option value="سند صرف">سند صرف</option>
-                <option value="سند استلام">سند استلام</option>
+                <option value="حركة صرف">حركة صرف</option>
+                <option value="حركة قبض">حركة قبض</option>
+                <option value="حركه نقديه">حركه نقديه</option>
               </select>
             </div>
           </div>
