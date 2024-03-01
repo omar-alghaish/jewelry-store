@@ -1,0 +1,20 @@
+.search_div {
+  margin-bottom: 30px;
+}
+
+.search_div input {
+  width: 100%;
+  padding: 10px;
+  outline: none;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* .productset.active {
+  border: 3px solid #6610f2 !important;
+  border-radius: 0px !important;
+} */
+
+.Toastify__toast-body {
+  font-family: "Tajawal" !important;
+}

@@ -6,7 +6,8 @@ import leveljs from "level-js";
 import { toast } from "react-toastify";
 import { getCurrentDate } from "../../functions/uniqeId";
 import AddToStore from "./AddToStore";
-
+import { Select, Input, Button, message } from "antd";
+const { Option } = Select;
 const levelup = require("levelup");
 const generateUniqueId = () => {
   const timestamp = new Date().getTime();
@@ -66,7 +67,11 @@ const Moves8 = () => {
     documentDate: getCurrentDate(),
     goldItems: [{ carat: "", weight: "" }],
     difference: 0,
+    customerType: "مورد",
   });
+  const [customers, setCustomers] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [selectedSupplier, setSelectedSuplier] = useState();
 
   const calculateTotalPrice = (goldItems) => {
     console.log("totalPrice");
@@ -199,7 +204,17 @@ const Moves8 = () => {
   const db = levelup(leveljs("./db"));
   const handleAdd = () => {
     setAllData((prevAllData) => {
-      const newData = [...prevAllData, {...formData, id: allData.length + 1,totalLocalCurrency : formData.afterDiscountAmount}];
+      const newData = [
+        ...prevAllData,
+        {
+          ...formData,
+          id: allData.length + 1,
+          totalLocalCurrency: formData.afterDiscountAmount,
+          cutomerName: selectedSupplier.supplier_name,
+          phone: selectedSupplier.phone,
+          customerId: selectedSupplier.id,
+        },
+      ];
       db.put("movements", JSON.stringify(newData), function (err) {
         if (err) {
           console.error("Error saving to database", err);
@@ -216,13 +231,18 @@ const Moves8 = () => {
     db.get("movements", function (err, value) {
       setAllData(value ? JSON.parse(value) : []);
     });
-  }, []);
-
-  useEffect(() => {
+    db.get("suppliers", function (err, value) {
+      setSuppliers(value ? JSON.parse(value) : []);
+    });
     db.get("calibers", function (err, value) {
       setCalibers(value ? JSON.parse(value) : []);
     });
   }, []);
+
+  const handleChange = (value) => {
+    const theSupplier = suppliers.find((item) => item.supplier_name === value);
+    setSelectedSuplier(theSupplier);
+  };
   const handleGoldItemChange = (index, name, value) => {
     // setFormData((prevFormData) => {
     //   const newGoldItems = [...prevFormData.goldItems];
@@ -236,8 +256,8 @@ const Moves8 = () => {
       const totalPrice =
         (calculateTotalPrice(prevFormData.goldItems) || 0) +
         +prevFormData.row3_moneyAmount;
-        const newGoldItems = [...prevFormData.goldItems];
-        newGoldItems[index][name] = value;
+      const newGoldItems = [...prevFormData.goldItems];
+      newGoldItems[index][name] = value;
       return {
         ...prevFormData,
         totalGoldPrice: totalPrice,
@@ -385,39 +405,55 @@ const Moves8 = () => {
                   <option value="حساب">حساب</option>
                 </select>
               </div>
-              <div className="form-group input">
-                <label>
-                  رمز
-                  {formData.customerType === "supplier"
-                    ? "المورد"
-                    : formData.customerType === "customer"
-                    ? "العميل"
-                    : formData.customerType === "account"
-                    ? "الحساب"
-                    : ""}
-                </label>
+              <div className="form-group full-width">
+                <label htmlFor="">{formData.customerType}</label>
+                <Select
+                  showSearch
+                  style={{ width: "100%" }}
+                  placeholder={`اختر ${formData.customerType}`}
+                  optionFilterProp="children"
+                  onChange={handleChange}
+                  filterOption={(input, option) =>
+                    option.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {suppliers?.map((sup) => (
+                    <Option
+                      key={sup.id}
+                      value={sup.supplier_name}
+                      style={{ height: "40px" }}
+                    >
+                      {sup.supplier_name}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+              <div className="form-group ">
+                <label>رقم الجوال</label>
                 <input
                   type="text"
-                  name="supplierCode"
-                  value={formData.supplierCode}
+                  name="phone"
+                  value={selectedSupplier?.phone}
+                  onChange={handleInputChange}
+                />
+              </div>{" "}
+              <div className="form-group ">
+                <label>رقم الحساب</label>
+                <input
+                  type="text"
+                  name="accountNumber"
+                  value={selectedSupplier?.id}
                   onChange={handleInputChange}
                 />
               </div>
-              <div className="form-group input">
-                <label htmlFor="">
-                  اسم{" "}
-                  {formData.customerType === "supplier"
-                    ? "المورد"
-                    : formData.customerType === "customer"
-                    ? "العميل"
-                    : formData.customerType === "account"
-                    ? " الحساب"
-                    : ""}
-                </label>
+              <div className="form-group ">
+                <label>رقم الهويه</label>
                 <input
                   type="text"
-                  name="radioText"
-                  value={formData.radioText}
+                  name="identityNumber"
+                  value={formData.identityNumber}
                   onChange={handleInputChange}
                 />
               </div>

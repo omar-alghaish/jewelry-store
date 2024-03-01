@@ -4,6 +4,8 @@ import "./style/main.css";
 import { getCurrentDate } from "../../functions/uniqeId";
 import leveljs from "level-js";
 import { toast } from "react-toastify";
+import { Select, Input, Button, message } from "antd";
+const { Option } = Select;
 
 const levelup = require("levelup");
 const Moves7 = () => {
@@ -11,6 +13,10 @@ const Moves7 = () => {
   const [allData, setAllData] = useState([]);
   const [calibers, setCalibers] = useState([]);
   const [retrieves, setRetrieves] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [selectedSupplier, setSelectedSuplier] = useState();
+
   const [formData, setFormData] = useState({
     id: allData.length + 1,
     movementType: "شراء كسر نقدي",
@@ -22,6 +28,7 @@ const Moves7 = () => {
     isCurrentPayOwner: false,
     installmentDateOwner: getCurrentDate(),
     installmentDateCustomer: getCurrentDate(),
+    customerType: "مورد",
   });
 
   useEffect(() => {
@@ -33,6 +40,9 @@ const Moves7 = () => {
     });
     db.get("retrieves", function (err, value) {
       setRetrieves(value ? JSON.parse(value) : []);
+    });
+    db.get("suppliers", function (err, value) {
+      setSuppliers(value ? JSON.parse(value) : []);
     });
   }, []);
 
@@ -124,7 +134,7 @@ const Moves7 = () => {
     });
   };
 
-  console.log(calibers);
+  console.log(suppliers);
   const calculateTotalWeightAndPrice = () => {
     let totalWeight = 0;
     let totalLocalCurrency = 0;
@@ -208,11 +218,20 @@ const Moves7 = () => {
     updateTotal();
   }, [formData.totalLocalCurrency, formData.moneyAmount]);
 
-  console.log(formData);
+  console.log(selectedSupplier);
   console.log(allData);
   const handleAdd = () => {
     setAllData((prevAllData) => {
-      const newData = [...prevAllData, { ...formData, id: allData.length + 1 }];
+      const newData = [
+        ...prevAllData,
+        {
+          ...formData,
+          id: allData.length + 1,
+          cutomerName: selectedSupplier.supplier_name,
+          phone: selectedSupplier.phone,
+          customerId: selectedSupplier.id,
+        },
+      ];
       db.put("movements", JSON.stringify(newData), function (err) {
         if (err) {
           console.error("Error saving to database", err);
@@ -229,7 +248,13 @@ const Moves7 = () => {
     setRetrieves((prevAllData) => {
       const newData = [
         ...prevAllData,
-        { ...formData, id: retrieves.length + 1 },
+        {
+          ...formData,
+          id: retrieves.length + 1,
+          cutomerName: selectedSupplier.supplier_name,
+          phone: selectedSupplier.phone,
+          customerId: selectedSupplier.id,
+        },
       ];
       db.put("retrieves", JSON.stringify(newData), function (err) {
         if (err) {
@@ -242,7 +267,16 @@ const Moves7 = () => {
     });
 
     setAllData((prevAllData) => {
-      const newData = [...prevAllData, { ...formData, id: allData.length + 1 }];
+      const newData = [
+        ...prevAllData,
+        {
+          ...formData,
+          id: allData.length + 1,
+          cutomerName: selectedSupplier.supplier_name,
+          phone: selectedSupplier.phone,
+          customerId: selectedSupplier.id,
+        },
+      ];
       db.put("movements", JSON.stringify(newData), function (err) {
         if (err) {
           console.error("Error saving to database", err);
@@ -253,6 +287,11 @@ const Moves7 = () => {
       });
       return newData;
     });
+  };
+
+  const handleChange = (value) => {
+    const theSupplier = suppliers.find((item) => item.supplier_name === value);
+    setSelectedSuplier(theSupplier);
   };
 
   return (
@@ -307,12 +346,35 @@ const Moves7 = () => {
               <option value="حساب">حساب</option>
             </select>
           </div>
+          <div className="form-group full-width">
+            <label htmlFor="">{formData.customerType}</label>
+            <Select
+              showSearch
+              style={{ width: "100%" }}
+              placeholder={`اختر ${formData.customerType}`}
+              optionFilterProp="children"
+              onChange={handleChange}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {suppliers?.map((sup) => (
+                <Option
+                  key={sup.id}
+                  value={sup.supplier_name}
+                  style={{ height: "40px" }}
+                >
+                  {sup.supplier_name}
+                </Option>
+              ))}
+            </Select>
+          </div>
           <div className="form-group ">
             <label>رقم الجوال</label>
             <input
               type="text"
               name="phone"
-              value={formData.phone}
+              value={selectedSupplier?.phone}
               onChange={handleInputChange}
             />
           </div>
@@ -330,7 +392,7 @@ const Moves7 = () => {
             <input
               type="text"
               name="accountNumber"
-              value={formData.accountNumber}
+              value={selectedSupplier?.id}
               onChange={handleInputChange}
             />
           </div>
@@ -351,7 +413,7 @@ const Moves7 = () => {
           </div>
         </div>
         <div className="row">
-          <div className="form-group">
+          {/* <div className="form-group">
             <label>اختر وقت الدفع</label>
             <select
               name="isCurrentPayOwner"
@@ -361,7 +423,7 @@ const Moves7 = () => {
               <option value="الدفع الان">الدفع الان</option>
               <option value="الدفع لاحقا">الدفع لاحقا</option>
             </select>
-          </div>
+          </div> */}
           {formData.isCurrentPayOwner === "الدفع لاحقا" && (
             <div className="form-group ">
               <label>تاريخ الدفع</label>

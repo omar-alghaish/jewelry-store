@@ -1192,6 +1192,51 @@ const Sidebar = (props) => {
                   </ul>
                 </li>
                 <li className="submenu-open">
+                  <h6 className="submenu-hdr">العملاء</h6>
+                  <ul>
+                    <li className="submenu">
+                      <Link
+                        to="#"
+                        className={
+                          pathname.includes("/dream-pos/customers")
+                            ? "subdrop active"
+                            : "" || isSideMenu == "customers"
+                            ? "subdrop active"
+                            : ""
+                        }
+                        onClick={() =>
+                          toggleSidebar(
+                            isSideMenu == "customers" ? "" : "customers"
+                          )
+                        }
+                      >
+                        <FeatherIcon icon="file-text" />
+                        <span>فواتير</span>
+                        <span className="menu-arrow" />
+                      </Link>
+                      {isSideMenu == "customers" ? (
+                        <ul>
+                          <li>
+                            <Link
+                              className={
+                                pathname.includes("customerList")
+                                  ? "active"
+                                  : ""
+                              }
+                              to="/dream-pos/customers/customerList"
+                            >
+                              فواتير العملاء
+                            </Link>
+                          </li>
+                       
+                        </ul>
+                      ) : (
+                        ""
+                      )}
+                    </li>
+                  </ul>
+                </li>
+                <li className="submenu-open">
                   <h6 className="submenu-hdr">الشعوب</h6>
                   <ul>
                     <li

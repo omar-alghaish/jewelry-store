@@ -27,9 +27,10 @@ import HomeTwo from "../MainPage/Home/home2";
 import IndexOne from "../MainPage/Home/home1";
 import AddCaliber from "../MainPage/Product/AddCaliber";
 import Moves from "../MainPage/moves";
-import Bills from "../MainPage/bills"
-import Accounts from "../MainPage/accountsFiles"
-import Stores from "../MainPage/Stores"
+import Bills from "../MainPage/bills";
+import Accounts from "../MainPage/accountsFiles";
+import Stores from "../MainPage/Stores";
+import Customers from "../MainPage/customers";
 
 export default [
   {
@@ -159,5 +160,9 @@ export default [
   {
     path: "store",
     component: Stores,
+  },
+  {
+    path: "customers",
+    component: Customers,
   },
 ];
